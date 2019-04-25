@@ -1,0 +1,35 @@
+version: '3.2'
+services:
+  db:
+    image: mongo:4-xenial
+    volumes:
+      - "./db:/data/db"
+      - type: volume
+        source: mongo_configdb
+        target: /data/configdb
+        volume:
+          nocopy: true
+    ports:
+      - "127.0.0.1:27017:27017"
+  app:
+    image: birds-of-poland-app:latest
+    build:
+      context: .
+      dockerfile: app.dockerfile
+    volumes:
+      - type: bind
+        source: ./
+        target: /opt/birds-of-poland
+    ports:
+      - "127.0.0.1:8080:8080"
+    user: ${UID:-1000}:${GID:-1000}
+  webserver:
+    image: birds-of-poland-webserver:latest
+    build:
+      context: .
+      dockerfile: webserver.dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8082:8082"
+volumes:
+  mongo_configdb:
